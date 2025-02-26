@@ -10,7 +10,7 @@ app.get('/',(req,res)=>{
 app.get('/icon',(req,res)=>{
   res.sendFile("icon.png",{root:__dirname})
 })
-app.post("/api/userdata", async (req, res) => {
+app.post("/api", async (req, res) => {
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     const agent = useragent.parse(req.headers["user-agent"]);
 
