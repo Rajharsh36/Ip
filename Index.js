@@ -10,14 +10,14 @@ app.get('/',(req,res)=>{
 app.get('/icon',(req,res)=>{
   res.sendFile("icon.png",{root:__dirname})
 })
-app.post("/api", async (req, res) => {
+app.post("/api/userdata", async (req, res) => {
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     const agent = useragent.parse(req.headers["user-agent"]);
 
-    // Ensure agent has valid properties
-    const browser = agent.family || "Unknown";
-    const os = agent.os.family || "Unknown";
-    const device = agent.device.family || "Desktop";
+    // Ensure properties exist before accessing them
+    const browser = agent?.family || "Unknown";
+    const os = agent?.os?.family || "Unknown";
+    const device = agent?.device?.family || "Desktop"; // Fix: Check if agent.device exists
 
     // Fetch geolocation data
     let locationData = {};
@@ -25,7 +25,7 @@ app.post("/api", async (req, res) => {
         const response = await fetch(`http://ip-api.com/json/${ip}`);
         locationData = await response.json();
     } catch (error) {
-        console.log("Failed to fetch geolocation data");
+        console.log("Failed to fetch geolocation data:", error.message);
     }
 
     // Extract frontend data
