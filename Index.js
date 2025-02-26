@@ -12,10 +12,14 @@ app.get('/icon',(req,res)=>{
 })
 app.post("/api", async (req, res) => {
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    const userAgent = req.headers["user-agent"];
-    const parsedUA = useragent(userAgent);
+    const agent = useragent.parse(req.headers["user-agent"]);
 
-    // Fetch geolocation data using fetch instead of Axios
+    // Ensure agent has valid properties
+    const browser = agent.family || "Unknown";
+    const os = agent.os.family || "Unknown";
+    const device = agent.device.family || "Desktop";
+
+    // Fetch geolocation data
     let locationData = {};
     try {
         const response = await fetch(`http://ip-api.com/json/${ip}`);
@@ -33,9 +37,9 @@ app.post("/api", async (req, res) => {
         city: locationData.city || "Unknown",
         isp: locationData.isp || "Unknown",
         timezone: locationData.timezone || "Unknown",
-        browser: parsedUA.browser.name,
-        os: parsedUA.os.name,
-        device: parsedUA.device.type || "Desktop",
+        browser,
+        os,
+        device,
         batteryLevel: battery?.batteryLevel || "N/A",
         charging: battery?.charging ? "Yes" : "No",
         internetSpeed: internetSpeed || "N/A Mbps",
