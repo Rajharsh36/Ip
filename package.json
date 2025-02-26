@@ -1,22 +1,18 @@
 {
-  "name": "express-ip-logger",
+  "name": "user-data-tracker",
   "version": "1.0.0",
-  "description": "A simple Express.js server that logs visitor IP addresses",
+  "description": "A simple Node.js Express server to collect user data like IP, device, browser, battery level, and internet speed.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.0"
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "user-agent-parser": "^1.0.2"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16"
   },
-  "keywords": ["express", "server", "ip-logger"],
-  "author": "harsh",
-  "license": "SRITE"
+  "license": "MIT"
 }
