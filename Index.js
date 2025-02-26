@@ -1,5 +1,5 @@
 const express = require("express");
-const useragent = require("user-agent-parser");
+const useragent = require("useragent");
 
 const app = express();
 app.use(express.json());
