@@ -1,38 +1,41 @@
 const express = require("express");
-const useragent = require("useragent");
+const UAParser = require("ua-parser-js");
 
 const app = express();
 app.use(express.json());
-app.set("trust proxy", true); // To get real IP behind proxies
+app.set("trust proxy", true); // Ensures correct IP retrieval behind proxies
 app.get('/',(req,res)=>{
   res.sendFile("index.html",{root:__dirname})
 })
 app.get('/icon',(req,res)=>{
   res.sendFile("icon.png",{root:__dirname})
 })
-app.post("/api", async (req, res) => {
-    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    const agent = useragent.parse(req.headers["user-agent"]);
+const getClientIPs = (req) => {
+    const forwarded = req.headers["x-forwarded-for"];
+    const proxyIPs = forwarded ? forwarded.split(",").map(ip => ip.trim()) : [];
+    const remoteIP = req.socket.remoteAddress;
+    return [...proxyIPs, remoteIP]; // Return all IPs
+};
 
-    // Ensure properties exist before accessing them
-    const browser = agent?.family || "Unknown";
-    const os = agent?.os?.family || "Unknown";
-    const device = agent?.device?.family || "Desktop"; // Fix: Check if agent.device exists
+app.post("/api/userdata", async (req, res) => {
+    const ipAddresses = getClientIPs(req);
+    const parser = new UAParser(req.headers["user-agent"]);
+    const browser = parser.getBrowser().name || "Unknown";
+    const os = parser.getOS().name || "Unknown";
+    const device = parser.getDevice().model || "Desktop";
 
-    // Fetch geolocation data
     let locationData = {};
     try {
-        const response = await fetch(`http://ip-api.com/json/${ip}`);
+        const response = await fetch(`http://ip-api.com/json/${ipAddresses[0]}`);
         locationData = await response.json();
     } catch (error) {
         console.log("Failed to fetch geolocation data:", error.message);
     }
 
-    // Extract frontend data
     const { battery, internetSpeed } = req.body;
 
     const userData = {
-        ip,
+        ipAddresses, // Include all IPs
         country: locationData.country || "Unknown",
         city: locationData.city || "Unknown",
         isp: locationData.isp || "Unknown",
