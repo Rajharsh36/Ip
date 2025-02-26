@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Data Tracker</title>
+</head>
+<body>
+    <h1>Hello, User!</h1>
+
+    <script>
+        async function sendUserData() {
+            let batteryData = {};
+            
+            // Get battery level and charging status
+            if (navigator.getBattery) {
+                const battery = await navigator.getBattery();
+                batteryData = {
+                    batteryLevel: battery.level * 100,
+                    charging: battery.charging,
+                };
+            }
+
+            // Measure internet speed
+            const downloadUrl = "/icon"; // Small test file
+            const startTime = performance.now();
+            const response = await fetch(downloadUrl);
+            const blob = await response.blob();
+            const endTime = performance.now();
+
+            const fileSizeInBits = blob.size * 8;
+            const timeTakenInSeconds = (endTime - startTime) / 1000;
+            const speedMbps = (fileSizeInBits / timeTakenInSeconds) / (1024 * 1024);
+
+            const data = {
+                battery: batteryData,
+                internetSpeed: speedMbps.toFixed(2),
+            };
+
+            console.log("Sending User Data:", data);
+
+            // Send data to backend
+            fetch("/api", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => console.log("Server Response:", result))
+            .catch(error => console.error("Error:", error));
+        }
+
+        sendUserData();
+    </script>
+</body>
+</html>
