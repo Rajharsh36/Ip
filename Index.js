@@ -1,13 +1,47 @@
 const express = require("express");
+const axios = require("axios");
+const useragent = require("user-agent-parser");
+
 const app = express();
+app.use(express.json());
+app.set("trust proxy", true); // To get real IP behind proxies
 
-// Trust Render's proxy to get real IP
-app.set("trust proxy", true);
+app.get('/',(req,res)=>{
+  res.sendFile("index.html",{root:__dirname})
+})
+app.post("/api", async (req, res) => {
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const userAgent = req.headers["user-agent"];
+    const parsedUA = useragent(userAgent);
 
-app.get("/", (req, res) => {
-    const userIP = req.headers["x-forwarded-for"] || req.ip; // Get real IP
-    console.log(`Visitor IP: ${userIP}`);
-    res.send(`Your IP: ${userIP}`);
+    // Fetch geolocation data
+    let locationData = {};
+    try {
+        const response = await axios.get(`http://ip-api.com/json/${ip}`);
+        locationData = response.data;
+    } catch (error) {
+        console.log("Failed to fetch geolocation data");
+    }
+
+    // Extract frontend data
+    const { battery, internetSpeed } = req.body;
+
+    const userData = {
+        ip,
+        country: locationData.country || "Unknown",
+        city: locationData.city || "Unknown",
+        isp: locationData.isp || "Unknown",
+        timezone: locationData.timezone || "Unknown",
+        browser: parsedUA.browser.name,
+        os: parsedUA.os.name,
+        device: parsedUA.device.type || "Desktop",
+        batteryLevel: battery?.batteryLevel || "N/A",
+        charging: battery?.charging ? "Yes" : "No",
+        internetSpeed: internetSpeed || "N/A Mbps",
+    };
+
+    console.log("User Data Received:", userData);
+    res.json({ message: "User data logged!", userData });
 });
 
 app.listen(3000, () => console.log("Server running on port 3000"));
