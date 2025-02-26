@@ -1,11 +1,9 @@
 const express = require("express");
-const axios = require("axios");
 const useragent = require("user-agent-parser");
 
 const app = express();
 app.use(express.json());
 app.set("trust proxy", true); // To get real IP behind proxies
-
 app.get('/',(req,res)=>{
   res.sendFile("index.html",{root:__dirname})
 })
@@ -17,11 +15,11 @@ app.post("/api", async (req, res) => {
     const userAgent = req.headers["user-agent"];
     const parsedUA = useragent(userAgent);
 
-    // Fetch geolocation data
+    // Fetch geolocation data using fetch instead of Axios
     let locationData = {};
     try {
-        const response = await axios.get(`http://ip-api.com/json/${ip}`);
-        locationData = response.data;
+        const response = await fetch(`http://ip-api.com/json/${ip}`);
+        locationData = await response.json();
     } catch (error) {
         console.log("Failed to fetch geolocation data");
     }
