@@ -9,6 +9,9 @@ app.set("trust proxy", true); // To get real IP behind proxies
 app.get('/',(req,res)=>{
   res.sendFile("index.html",{root:__dirname})
 })
+app.get('/icon',(req,res)=>{
+  res.sendFile("icon.png",{root:__dirname})
+})
 app.post("/api", async (req, res) => {
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     const userAgent = req.headers["user-agent"];
