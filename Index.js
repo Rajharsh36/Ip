@@ -17,7 +17,7 @@ const getClientIPs = (req) => {
     return [...proxyIPs, remoteIP]; // Return all IPs
 };
 
-app.post("/api/userdata", async (req, res) => {
+app.post("/api", async (req, res) => {
     const ipAddresses = getClientIPs(req);
     const parser = new UAParser(req.headers["user-agent"]);
     const browser = parser.getBrowser().name || "Unknown";
